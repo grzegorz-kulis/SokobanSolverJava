@@ -1,0 +1,24 @@
+Improve state generating code:
+    1. Solution appending, that can be done better, neater                                                  Not really
+    2. checking solution, should be fed with only sets                                                      DONE
+    3. Singleton? We just need one copy of this.                                                            Not really
+    4. Multi-threading for the better performance (time)                                                    TODO
+    5. While checking moves, code should be as much generic as possible, there are repetitions right now    DONE
+    6. Check solution after generating state, that saves iterations/time                                    DONE
+
+Measure number of iterations until solution was found                                                       DONE
+Measure time until solution was found                                                                       DONE
+Deep Copy should be JUST interface!                                                                         DONE
+Implement DeepCopy only where it is really needed!                                                          DONE
+Create own interface which would overwrite compareTo so that states can be easily compared                  Not really
+Do something about state.hashState, ugly af                                                                 TODO
+Add simple deadlock checking                                                                                TODO
+Add feature that would auto-generate deadlock states based on given map/state                               TODO
+Add improved deadlock checking                                                                              TODO
+Add a function which would determine how the new states would be generated                                  TODO
+Add a feature which would let user to choose between search algorithms (BFS, DFS etc.)                      TODO
+Multi-threading! Number of threads = number of boxes (just for now)                                         TODO
+Enums instead of chars in classes                                                                           DONE
+
+Dawid:
+logger
