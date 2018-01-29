@@ -6,7 +6,9 @@ public class Main {
 
 	public static void main(String[] args) {
 		try {
-			ReadFile.getInstance().loadBoardFromFile("res/test.txt");
+			ReadFile.getInstance().loadBoardFromFile("res/test_deadlock.txt");
+//			ReadFile.getInstance().loadBoardFromFile("res/test.txt");
+//			ReadFile.getInstance().loadBoardFromFile("res/test_5.txt");
 		} catch(IOException e) {
 			e.printStackTrace();
 		}

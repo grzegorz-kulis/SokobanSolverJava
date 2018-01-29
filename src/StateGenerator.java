@@ -35,7 +35,7 @@ public class StateGenerator {
         long startTime = System.currentTimeMillis();
 
         while (stateQueue.size() != 0) {
-            //for(int a = 0; a < 1; a++) {
+//            for(int a = 0; a < 1; a++) {
             State currentBoardState = stateQueue.peek();
             //peek to the first State in the queue and examine it and generate children from it
             System.out.println("\nLEADING STATE");
@@ -51,42 +51,54 @@ public class StateGenerator {
             }
 
             //check all the moves: down, right, up, left
-            for (int l = 0; l < MAX_POSSIBLE_MOVES; l++) {
+            for (int move = 0; move < MAX_POSSIBLE_MOVES; move++) {
                 iterationsSolution++;
                 State newBoardState = null;
-                Object fieldClassFromOriginalBoardUnderCurrentPositionOfPlayer =
+
+                GridType fieldClassFromOriginalBoardUnderCurrentPositionOfPlayerGrid =
                         originalBoardState.getBoard().getGridBoard()
                                 [currentBoardState.getBoard().getPlayerPosition().getX()]
                                 [currentBoardState.getBoard().getPlayerPosition().getY()]
-                                .getClass();
-                Object fieldClassFromCurrentBoardInFrontOfPlayer =
-                        currentBoardState.getBoard().getGridBoard()
-                                [currentBoardState.getBoard().getPlayerPosition().getX() + MX[l]]
-                                [currentBoardState.getBoard().getPlayerPosition().getY() + MY[l]]
-                                .getClass();
+                                .getGridType();
 
-                //ON THE CHECKING SPOT THERE IS A WALL
-                if (fieldClassFromCurrentBoardInFrontOfPlayer == Wall.class) {
-                    newBoardState = MoveSimulator.spotCheckIsWall();
-                    addState = false;
-                }
-                //ON THE CHECKING SPOT THERE IS A EMPTY SPOT
-                else if (fieldClassFromCurrentBoardInFrontOfPlayer == Field.class) {
-                    newBoardState = MoveSimulator.spotCheckIsField(fieldClassFromOriginalBoardUnderCurrentPositionOfPlayer, currentBoardState, l);
-                    addState = true;
-                }
-                //ON THE CHECKING SPOT THERE IS A GOAL SPOT
-                else if (fieldClassFromCurrentBoardInFrontOfPlayer == Goal.class) {
-                    newBoardState = MoveSimulator.spotCheckIsGoal(fieldClassFromOriginalBoardUnderCurrentPositionOfPlayer, currentBoardState, l);
-                    addState = true;
-                }
-                //ON THE CHECKING SPOT THERE IS A BOX
-                else if (fieldClassFromCurrentBoardInFrontOfPlayer == Box.class) {
-                    newBoardState = MoveSimulator.spotCheckIsBox(fieldClassFromOriginalBoardUnderCurrentPositionOfPlayer, currentBoardState, l);
-                    addState = true;
-                } else {
-                    System.out.println("Something went wrong");
-                    addState = false;
+                GridType fieldClassFromCurrentBoardInFrontOfPlayerGrid =
+                        currentBoardState.getBoard().getGridBoard()
+                                [currentBoardState.getBoard().getPlayerPosition().getX() + MX[move]]
+                                [currentBoardState.getBoard().getPlayerPosition().getY() + MY[move]]
+                                .getGridType();
+
+                switch (fieldClassFromCurrentBoardInFrontOfPlayerGrid) {
+                    case WALL: {
+                        newBoardState = MoveSimulator.spotCheckIsWall();
+                        addState = false;
+                        break;
+                    }
+                    case FIELD: {
+                        newBoardState = MoveSimulator.spotCheckIsField(fieldClassFromOriginalBoardUnderCurrentPositionOfPlayerGrid,
+                                                                       currentBoardState,
+                                                                       move);
+                        addState = true;
+                        break;
+                    }
+                    case GOAL: {
+                        newBoardState = MoveSimulator.spotCheckIsGoal(fieldClassFromOriginalBoardUnderCurrentPositionOfPlayerGrid,
+                                                                      currentBoardState,
+                                                                      move);
+                        addState = true;
+                        break;
+                    }
+                    case BOX: {
+                        newBoardState = MoveSimulator.spotCheckIsBox(fieldClassFromOriginalBoardUnderCurrentPositionOfPlayerGrid,
+                                                                     startingBoardState.getBoard().getGoals(),
+                                                                     currentBoardState,
+                                                                     move);
+                        addState = true;
+                        break;
+                    }
+                    default: {
+                        System.out.println("Something went wrong");
+                        addState = false;
+                    }
                 }
 
                 System.out.println(newBoardState);
@@ -107,13 +119,15 @@ public class StateGenerator {
                         System.out.println("Adding state to the queue");
                         alreadyInQueue.add(newBoardState.getStateHash());
                         stateQueue.offer(newBoardState);
+                    } else {
+                        return "Check your source code mr developer xD";
                     }
                 }
                 System.out.println("\n----------------------------\n");
-            }
-            //just remove the current state from the queue, it is not a solution and it has been already added to HashMap of locked states
+            } // ending for
+            // just remove the current state from the queue, it is not a solution and it has been already added to HashMap of locked states
             stateQueue.poll();
-        } //ending while
+        } // ending while
         return "Unable to find solution, sorry";
     }
 
@@ -163,7 +177,7 @@ public class StateGenerator {
             return resultingNewSolution;
         }
 
-        private static TreeMap<String, Box> updateBoxMap(TreeMap<String, Box> boxes, String valueToRemove, Box valueToAdd) {
+        private static TreeMap<String, Box> updateBoxMap(Map<String, Box> boxes, String valueToRemove, Box valueToAdd) {
             TreeMap<String, Box> temp = new TreeMap<>(boxes);
             temp.remove(valueToRemove);
             temp.put(Integer.toString(valueToAdd.getX()) + Integer.toString(valueToAdd.getY()), valueToAdd);
@@ -175,7 +189,7 @@ public class StateGenerator {
             return null;
         }
 
-        private static State spotCheckIsField(Object gridClassUnderInitial, State currentState, int moveDirection) {
+        private static State spotCheckIsField(GridType gridClassUnderInitial, State currentState, int moveDirection) {
             System.out.println("Field encountered. New state will be generated.");
             int posXofFieldInCurrentBoard = currentState.getBoard().getPlayerPosition().getX();
             int posYofFieldInCurrentBoard = currentState.getBoard().getPlayerPosition().getY();
@@ -183,7 +197,7 @@ public class StateGenerator {
             buildNewBoard.setGrid(currentState.getBoard().getGridBoard());
 
             //check if the spot where player is standing is Goal spot by any chance  in the original map
-            if (gridClassUnderInitial == Goal.class) {
+            if (gridClassUnderInitial.equals(GridType.GOAL)) {
                 buildNewBoard.getGridBoard()[posXofFieldInCurrentBoard][posYofFieldInCurrentBoard]
                         = new Goal(posXofFieldInCurrentBoard, posYofFieldInCurrentBoard);
                 buildNewBoard.setPlayerPosition(new Player(posXofFieldInCurrentBoard + MX[moveDirection], posYofFieldInCurrentBoard + MY[moveDirection]));
@@ -197,7 +211,7 @@ public class StateGenerator {
             return new State(buildNewBoard, appendSolution(new StringBuilder(currentState.getSolution()), moveDirection, GridType.FIELD.toString()));
         }
 
-        private static State spotCheckIsGoal(Object gridClassUnderInitial, State currentState, int moveDirection) {
+        private static State spotCheckIsGoal(GridType gridClassUnderInitial, State currentState, int moveDirection) {
             System.out.println("Goal encountered. New state will be generated.");
             int posXofFieldInCurrentBoard = currentState.getBoard().getPlayerPosition().getX();
             int posYofFieldInCurrentBoard = currentState.getBoard().getPlayerPosition().getY();
@@ -205,7 +219,7 @@ public class StateGenerator {
             buildNewBoard.setGrid(currentState.getBoard().getGridBoard());
 
             //check if the spot where player is standing is Goal spot by any chance  in the original map
-            if (gridClassUnderInitial == Goal.class) {
+            if (gridClassUnderInitial.equals(GridType.GOAL)) {
                 buildNewBoard.getGridBoard()[posXofFieldInCurrentBoard][posYofFieldInCurrentBoard]
                         = new Goal(posXofFieldInCurrentBoard, posYofFieldInCurrentBoard);
                 buildNewBoard.setPlayerPosition(new Player(posXofFieldInCurrentBoard + MX[moveDirection], posYofFieldInCurrentBoard + MY[moveDirection]));
@@ -218,12 +232,13 @@ public class StateGenerator {
             return new State(buildNewBoard, appendSolution(new StringBuilder(currentState.getSolution()), moveDirection, GridType.GOAL.toString()));
         }
 
-        private static State spotCheckIsBox(Object gridClassUnderInitial, State currentState, int moveDirection) {
+        private static State spotCheckIsBox(GridType gridTypeUnderInitial, TreeMap<String, Goal> goals, State currentState, int moveDirection) {
             System.out.println("Box encountered. New state might be generated.");
-            Object fieldClassFromCurrentBoardTwiceInFrontOfPlayer =
-                    currentState.getBoard().getGridBoard()[currentState.getBoard().getPlayerPosition().getX() + MX[moveDirection] + MX[moveDirection]]
+            GridType fieldClassFromCurrentBoardTwiceInFrontOfPlayer =
+                    currentState.getBoard().getGridBoard()
+                            [currentState.getBoard().getPlayerPosition().getX() + MX[moveDirection] + MX[moveDirection]]
                             [currentState.getBoard().getPlayerPosition().getY() + MY[moveDirection] + MY[moveDirection]]
-                            .getClass();
+                            .getGridType();
 
             int posXofFieldInCurrentBoard = currentState.getBoard().getPlayerPosition().getX();
             int posYofFieldInCurrentBoard = currentState.getBoard().getPlayerPosition().getY();
@@ -231,14 +246,14 @@ public class StateGenerator {
             buildNewBoard.setGrid(currentState.getBoard().getGridBoard());
 
             //check if there is a wall or another box behind the pushing box
-            if (fieldClassFromCurrentBoardTwiceInFrontOfPlayer == Box.class || fieldClassFromCurrentBoardTwiceInFrontOfPlayer == Wall.class) {
+            if (fieldClassFromCurrentBoardTwiceInFrontOfPlayer.equals(GridType.BOX)|| fieldClassFromCurrentBoardTwiceInFrontOfPlayer.equals(GridType.WALL)) {
                 System.out.println("Can not push. Box or wall ahead.");
                 return null;
             }
             else {
-                System.out.println("Box can be pushed. New state will be generated.");
+                System.out.println("Box can be pushed. New state will be generated unless it is deadlock.");
                 //check if the spot where player is standing is Goal spot by any chance  in the original map
-                if(gridClassUnderInitial == Goal.class) {
+                if(gridTypeUnderInitial.equals(GridType.GOAL)) {
                     buildNewBoard.getGridBoard()[posXofFieldInCurrentBoard][posYofFieldInCurrentBoard]
                             = new Goal(posXofFieldInCurrentBoard, posYofFieldInCurrentBoard);
                     buildNewBoard.setPlayerPosition(new Player(posXofFieldInCurrentBoard + MX[moveDirection], posYofFieldInCurrentBoard + MY[moveDirection]));
@@ -247,15 +262,82 @@ public class StateGenerator {
                     buildNewBoard.getGridBoard()[posXofFieldInCurrentBoard][posYofFieldInCurrentBoard]
                             = new Field(posXofFieldInCurrentBoard, posYofFieldInCurrentBoard);
                     buildNewBoard.setPlayerPosition(new Player(posXofFieldInCurrentBoard + MX[moveDirection], posYofFieldInCurrentBoard + MY[moveDirection]));
-
                 }
                 buildNewBoard.setBoxes(updateBoxMap(
                         currentState.getBoard().getBoxes(),
                         Integer.toString(buildNewBoard.getPlayerPosition().getX()) + Integer.toString(buildNewBoard.getPlayerPosition().getY()),
                         new Box(buildNewBoard.getPlayerPosition().getX() + MX[moveDirection], buildNewBoard.getPlayerPosition().getY() + MY[moveDirection])));
 
-                return new State(buildNewBoard, appendSolution(new StringBuilder(currentState.getSolution()), moveDirection, GridType.BOX.toString()));
+                // check if newly built board is not in deadlock by any means
+                if(DeadlockChecker.checkDeadlock(buildNewBoard, goals)) {
+                    System.out.println("This will lead to deadlock, generating this state is pointless");
+                    return null;
+                }
+                else
+                    return new State(buildNewBoard, appendSolution(new StringBuilder(currentState.getSolution()), moveDirection, GridType.BOX.toString()));
             }
+        }
+
+    }
+
+    private static class DeadlockChecker {
+        private static boolean checkDeadlock(Board board, TreeMap<String, Goal> goals) {
+            // check if position under board is a deadlock position
+            // 1. simple deadlock - corner
+            boolean result = simpleCornerDeadlock(board, goals);
+
+            return result;
+        }
+
+        private static boolean simpleCornerDeadlock(Board board, TreeMap<String, Goal> goals) {
+            Map<String, Box> boxes = board.getBoxes();
+            //System.out.println("\n----------- DEADLOCKS --------------");
+
+            for(Box  box : boxes.values()) {
+                Map<MoveDirections, Boolean> possible = box.getDeadlockMapping();
+                int deadLockCounter = 0;
+                for(int move = 0; move < MAX_POSSIBLE_MOVES; move++) {
+                    //System.out.println("box X: " + (box.getX()+ MX[move]) + ", box Y: " + (box.getY()+ MY[move]) + ", gridType: " + board.getGridBoard()[box.getX() + MX[move]][box.getY() + MY[move]].getGridType().name());
+                    if((board.getGridBoard()[box.getX() + MX[move]][box.getY() + MY[move]].getGridType()).equals(GridType.WALL) &&
+                            seekThroughGoals(box, goals)) {
+                        possible.put(MoveDirections.getEnumByInt(move), true);
+                        //System.out.println("Deadlock Counter++");
+                        box.setDeadLockCounter(++deadLockCounter);
+                    }
+                }
+                System.out.println("Box at (" + box.getX() + ", " + box.getY() + "): " + DebugFunctions.mapToString(possible));
+                if((possible.get(MoveDirections.DOWN) && possible.get(MoveDirections.LEFT)) ||
+                        (possible.get(MoveDirections.DOWN) && possible.get(MoveDirections.RIGHT)) ||
+                        (possible.get(MoveDirections.UP) && possible.get(MoveDirections.RIGHT)) ||
+                        (possible.get(MoveDirections.UP) && possible.get(MoveDirections.LEFT))) {
+                    System.out.println("Looks like corner deadlock to me");
+                    return true;
+                }
+                if(box.getDeadLockCounter() >= 3) return true;
+            }
+            return false;
+        }
+
+        private static boolean seekThroughGoals(Box box, TreeMap<String, Goal> goals) {
+            for(Goal goal : goals.values()) {
+                //System.out.println("goal X: " + goal.getX() + ", goal Y: " + goal.getY());
+                if(goal.equals(box))  {
+                    //System.out.println("RETURN FALSE");
+                    return false;
+                }
+            }
+            //System.out.println("RETURN TRUE");
+            return true;
+        }
+    }
+
+    private static class DebugFunctions {
+        private static String mapToString(Map<MoveDirections, Boolean> map) {
+            StringBuilder stringedAll = new StringBuilder();
+            for (MoveDirections k : map.keySet()) {
+                stringedAll.append(k.name()).append(": ").append(map.get(k)).append(", ");
+            }
+            return stringedAll.toString();
         }
     }
 }

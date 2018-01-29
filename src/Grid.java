@@ -31,11 +31,10 @@ public abstract class Grid implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null) return false;
         Grid grid = (Grid) o;
         return x == grid.x &&
-                y == grid.y &&
-                gridType == grid.gridType;
+                y == grid.y;
     }
 
     @Override

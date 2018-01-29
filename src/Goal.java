@@ -8,6 +8,11 @@ public class Goal extends Grid implements Serializable {
 		super(x, y, gridType);
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		return super.equals(o);
+	}
+
 	public String toString() {
 		return "Goal at: " + "(" + Integer.toString(super.getX()) + "," + Integer.toString(super.getY()) + ")\n";
 	}

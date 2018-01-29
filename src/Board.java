@@ -4,7 +4,6 @@ import java.util.*;
 public class Board implements Serializable, DeepCopy {
     private int boardWidth;
     private int boardHeight;
-
     private Player playerPosition;
     private Map<String, Box> boxes;
     private Map<String, Goal> goals;
@@ -34,8 +33,7 @@ public class Board implements Serializable, DeepCopy {
             for(int col = 0; col < s.length(); col++) {
                 char[] arr = s.toCharArray();
                 if(arr[col] == GridType.PLAYER.toString().charAt(0)) {
-                    Player tempPlayer = new Player(row,col);
-                    gridBoard[row][col] = this.playerPosition = tempPlayer;
+                    gridBoard[row][col] = this.playerPosition = new Player(row,col);
                 } else if(arr[col] == GridType.BOX.toString().charAt(0)) {
                     Box tempBox = new Box(row, col);
                     gridBoard[row][col] = tempBox;
@@ -132,7 +130,7 @@ public class Board implements Serializable, DeepCopy {
     public String toString() {
         return DebugFunctions.printBoard(this)
                 + this.playerPosition.toString()
-                + "\nBox addresses:\n" + DebugFunctions.boxListToString((TreeMap)this.boxes).toString();
+                + "\nBox addresses:\n" + DebugFunctions.boxListToString(this.boxes).toString();
     }
 
     private static class DebugFunctions {
@@ -147,7 +145,7 @@ public class Board implements Serializable, DeepCopy {
             return output.toString();
         }
 
-        private static StringBuilder boxListToString(TreeMap<String, Box> boxList) {
+        private static StringBuilder boxListToString(Map<String, Box> boxList) {
             StringBuilder boxListString = new StringBuilder();
             for(String name: boxList.keySet()) {
                 String value = boxList.get(name).toString();

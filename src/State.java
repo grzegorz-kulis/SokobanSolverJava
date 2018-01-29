@@ -48,9 +48,8 @@ public class State implements Serializable {
 	}
 
 	private static <K,V> String treeMapKeySetToString(TreeMap<K, V> treeMap) {
-		Set<K> keys = treeMap.keySet();
 		StringBuilder stringedKeySet = new StringBuilder();
-		for(K i : keys) {
+		for(K i : treeMap.keySet()) {
 			stringedKeySet.append(i);
 		}
 		return stringedKeySet.toString();

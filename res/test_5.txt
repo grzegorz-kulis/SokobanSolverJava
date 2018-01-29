@@ -1,6 +1,6 @@
-08 05 01
+08 05 02
 XXXXXXXX
-X......X
-XM.J..GX
-X......X
+X.....GX
+XMJXXJXX
+X.....GX
 XXXXXXXX
